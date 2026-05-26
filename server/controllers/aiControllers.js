@@ -4,15 +4,28 @@ const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 
-let openai;
-try {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: "https://api.groq.com/openai/v1",
-  });
-} catch (error) {
-  console.warn("OpenAI API key not configured or invalid.");
-}
+let _openai = null;
+let _openaiInitAttempted = false;
+
+const getOpenAI = () => {
+  if (_openaiInitAttempted) return _openai;
+  _openaiInitAttempted = true;
+  
+  try {
+    if (process.env.OPENAI_API_KEY) {
+      _openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+        baseURL: "https://api.groq.com/openai/v1",
+      });
+      console.log("OpenAI client initialized successfully.");
+    } else {
+      console.warn("OPENAI_API_KEY is not defined in process.env.");
+    }
+  } catch (error) {
+    console.warn("OpenAI API key not configured or invalid.", error.message);
+  }
+  return _openai;
+};
 
 export const parseResume = async (req, res) => {
   try {
@@ -37,6 +50,7 @@ export const parseResume = async (req, res) => {
       return res.status(400).json({ message: "Unsupported file format. Use PDF or DOCX." });
     }
 
+    const openai = getOpenAI();
     if (!openai) {
       console.warn("OpenAI not configured, returning simulated parsed data");
       return res.status(200).json({
@@ -93,6 +107,7 @@ export const parseResume = async (req, res) => {
 
 export const optimizeResume = async (req, res) => {
   try {
+    const openai = getOpenAI();
     const { content } = req.body;
     if (!content) return res.status(400).json({ message: "Content is required" });
 
@@ -105,12 +120,14 @@ export const optimizeResume = async (req, res) => {
 
     res.status(200).json({ message: "Success", optimizedContent: response.choices[0].message.content.trim() });
   } catch (error) {
+    console.error("AI Optimize Error:", error);
     res.status(500).json({ message: "Error optimizing content" });
   }
 };
 
 export const generateSummary = async (req, res) => {
   try {
+    const openai = getOpenAI();
     const { role, experience, skills } = req.body;
     if (!openai) return res.status(200).json({ summary: "A dedicated professional." });
 
@@ -119,12 +136,14 @@ export const generateSummary = async (req, res) => {
 
     res.status(200).json({ summary: response.choices[0].message.content.trim() });
   } catch (error) {
+    console.error("AI Summary Error:", error);
     res.status(500).json({ message: "Error generating summary" });
   }
 };
 
 export const generateAchievements = async (req, res) => {
   try {
+    const openai = getOpenAI();
     const { role, responsibilities } = req.body;
     if (!openai) return res.status(200).json({ achievements: ["Increased efficiency by 20%."] });
 
@@ -133,12 +152,14 @@ export const generateAchievements = async (req, res) => {
 
     res.status(200).json({ achievements: response.choices[0].message.content.split("\n").filter(a => a.trim() !== "") });
   } catch (error) {
+    console.error("AI Achievements Error:", error);
     res.status(500).json({ message: "Error generating achievements" });
   }
 };
 
 export const recommendSkills = async (req, res) => {
   try {
+    const openai = getOpenAI();
     const { role, currentSkills } = req.body;
     if (!openai) return res.status(200).json({ skills: ["Leadership", "Communication"] });
 
@@ -148,12 +169,14 @@ export const recommendSkills = async (req, res) => {
     const recommended = response.choices[0].message.content.split(",").map(s => s.trim());
     res.status(200).json({ skills: recommended });
   } catch (error) {
+    console.error("AI Skills Error:", error);
     res.status(500).json({ message: "Error recommending skills" });
   }
 };
 
 export const generateCareerObjective = async (req, res) => {
   try {
+    const openai = getOpenAI();
     const { targetRole, background } = req.body;
     if (!openai) return res.status(200).json({ objective: "Looking for a challenging role." });
 
@@ -162,12 +185,14 @@ export const generateCareerObjective = async (req, res) => {
 
     res.status(200).json({ objective: response.choices[0].message.content.trim() });
   } catch (error) {
+    console.error("AI Objective Error:", error);
     res.status(500).json({ message: "Error generating objective" });
   }
 };
 
 export const getAtsScore = async (req, res) => {
   try {
+    const openai = getOpenAI();
     const { resumeText, jobDescription } = req.body;
     if (!resumeText || !jobDescription) return res.status(400).json({ message: "Missing data" });
 

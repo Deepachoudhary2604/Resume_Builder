@@ -161,11 +161,7 @@ const ResumeBuilder = () => {
               {sections[activeSectionIndex].name}
             </h2>
             <div className="flex gap-2">
-              <label className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-xl hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors cursor-pointer border border-purple-200 dark:border-purple-800">
-                <Sparkles className="w-4 h-4" />
-                {isUploading ? "Uploading..." : "AI Autofill"}
-                <input type="file" accept=".pdf" hidden onChange={handleFileUpload} disabled={isUploading} />
-              </label>
+
               <Button variant="outline" size="sm" onClick={handleGetAtsScore}>
                 ATS Check
               </Button>
