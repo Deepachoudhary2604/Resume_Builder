@@ -1,16 +1,18 @@
 import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
 
 const connectDB = async () => {
   try {
+    const uri = process.env.MONGODB_URI;
+    
+    if (!uri) {
+      console.warn("⚠️ MONGODB_URI is not defined. Please set it in your environment variables.");
+    }
+
     mongoose.connection.on("connected", () => {
-      console.log("MongoDB connected successfully (In-Memory)");
+      console.log("MongoDB connected successfully");
     });
 
-    const mongoServer = await MongoMemoryServer.create();
-    const mongoURI = mongoServer.getUri();
-
-    await mongoose.connect(mongoURI);
+    await mongoose.connect(uri || "mongodb://localhost:27017/resume_builder");
   } catch (error) {
     console.error("MongoDB connection error:", error);
     process.exit(1);
