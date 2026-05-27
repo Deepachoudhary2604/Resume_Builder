@@ -9,7 +9,8 @@ import { configureSecurity } from './middlewares/security.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-await connectDB();
+// Connect to MongoDB but don't block the server startup
+connectDB().then(() => console.log("MongoDB connection initialized")).catch(err => console.error("MongoDB failed to connect:", err));
 
 
 app.use(cors());
