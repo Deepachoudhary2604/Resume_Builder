@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-
+import { API_BASE_URL } from "../configs/config";
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const res = await axios.post("http://localhost:3000/api/users/login", { email, password });
+    const res = await axios.post(`${API_BASE_URL}/api/users/login`, { email, password });
     const { token, user } = res.data;
     localStorage.setItem("token", token);
     setToken(token);
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const res = await axios.post("http://localhost:3000/api/users/register", { name, email, password });
+    const res = await axios.post(`${API_BASE_URL}/api/users/register`, { name, email, password });
     const { token, user } = res.data;
     localStorage.setItem("token", token);
     setToken(token);
